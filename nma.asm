@@ -6,6 +6,7 @@
     endOfLine db 4 dup(?)
     startOfRules db 4 dup(?)
     endOfRules db 4 dup(?)
+    curentRule db 4 dup(?)
     fileName db "input.nma", 0 ; файл який будемо читати
     fileHandle dw ?            ; handle
 .CODE
@@ -50,36 +51,83 @@ main:
 
 
 
-    compareBytes proc
-   
-    mov si, word ptr startOfLine      
-    mov di, word ptr startOfRules     ;;there must be adress of current rule 
 
-    mov cx, 2 ;   move length of rule
+
+
+    compareBytes:
+   
+    mov si, word ptr startOfLine    
+    xor dx,dx
+    mov dx, word ptr startOfRules   
+    mov word ptr curentRule , dx    ;there must be adress of current rule 
+
+set_rule:
+    mov si, word ptr startOfLine 
+    mov di, word ptr curentRule  
+    call string_length          ;length in dx, di pointer on string
+
+    mov cx, dx
 compare_loop:
+
     mov al, byte ptr [di]     
-    cmp al, byte ptr [si]     ; С
+    cmp al, byte ptr [si]     ; 
     jne not_equal             ; 
     inc si                    
     inc di                    ; 
     loop compare_loop         ; 
 
   
-       ;;;;;; replace, move to next rule
-    ret
+                               
+    jmp set_rule
+    
 
 not_equal:
-    cmp si, word ptr endOfRules
-    cmp byte ptr [di], 9
+    cmp si, word ptr endOfLine
+    je new_rule
 
     inc si
-    mov di, word ptr startOfRules ; there must be adress of current rule 
+    mov di, word ptr curentRule  ; there must be adress of current rule 
+    jne  compare_loop    
+new_rule:
 
-    jne  compare_loop              ;
-    ret
-compareBytes endp
+    mov di, word ptr curentRule
+find_new_rule:    
+    inc di
+    cmp byte ptr [di],0ah
+    jne find_new_rule
+
+    inc di
+    cmp byte ptr [di],00h
+    je ende ; STDOUT
+    mov word ptr curentRule, di
+    jmp set_rule
+          
+
+
+
+
+string_length proc
+    xor dx, dx             
+
+length_loop:
+    cmp byte ptr [di], 09h  
+    je length_done       
+    inc di                 
+    inc dx              
+    jmp length_loop        
+
+length_done:
+    ret                    
+string_length endp
+   
+
+
+
+
 
  
+
+
 
                 
           
