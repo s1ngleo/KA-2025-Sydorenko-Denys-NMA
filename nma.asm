@@ -7,8 +7,11 @@
     startOfRules db 4 dup(?)
     endOfRules db 4 dup(?)
     curentRule db 4 dup(?)
+  linePartToReplaceLENGTH db 4 dup(?)
+    linePartToReplace db 4 dup(?) 
     fileName db "input.nma", 0 ; файл який будемо читати
-    fileHandle dw ?            ; handle
+    fileHandle dw ?  ; handle    
+        
 .CODE
 main:
     mov ax, @data
@@ -63,11 +66,15 @@ main:
 
 set_rule:
     mov si, word ptr startOfLine 
+    mov word ptr linePartToReplace, si
     mov di, word ptr curentRule  
     call string_length          ;length in dx, di pointer on string
 
+    mov word ptr linePartToReplaceLENGTH, dx
     mov cx, dx
+
 compare_loop:
+    
 
     mov al, byte ptr [di]     
     cmp al, byte ptr [si]     ; 
@@ -76,16 +83,19 @@ compare_loop:
     inc di                    ; 
     loop compare_loop         ; 
 
-  
-                               
+    jmp replace
+    replace_end:                
     jmp set_rule
     
 
 not_equal:
+
     cmp si, word ptr endOfLine
     je new_rule
 
     inc si
+    mov word ptr linePartToReplace, si
+
     mov di, word ptr curentRule  ; there must be adress of current rule 
     jne  compare_loop    
 new_rule:
@@ -105,10 +115,40 @@ find_new_rule:
 
 
 
+replace:
+    mov si, word ptr linePartToReplace
+    mov di, word ptr curentRule  
 
-string_length proc
+goto_replaceRule:
+
+    inc di
+    cmp byte ptr [di], 09h
+    jne goto_replaceRule
+    inc di
+    call string_length
+
+    cmp dx, word ptr linePartToReplaceLENGTH
+    je replace_cycle
+    
+
+replace_cycle:
+    
+
+    mov bh, byte ptr [di]
+    mov [si], bh
+    
+    inc di
+    inc si
+    cmp byte ptr [di],09h
+    je replace_end
+    jne replace_cycle
+    
+
+
+
+string_length proc   ;start of string in di, end must be 09h. result in dx
     xor dx, dx             
-
+    push di
 length_loop:
     cmp byte ptr [di], 09h  
     je length_done       
@@ -117,23 +157,12 @@ length_loop:
     jmp length_loop        
 
 length_done:
+    pop di
     ret                    
 string_length endp
    
 
 
-
-
-
- 
-
-
-
-                
-          
-         
-
-       
 
 
 
@@ -157,7 +186,29 @@ read4BytesInAx proc
 
 
 
+
+
+printLine proc
+    mov si, word ptr startOfLine  
+  
+
+print_loop:
+    cmp byte ptr [si], 0dh               
+    je print_done                 
+
+    mov dl, byte ptr [si]          
+    mov ah, 02h                  
+    int 21h                     
+    inc si                        
+    jmp print_loop                
+
+print_done:
+    ret                           
+printLine endp
+    
+
 ende:
+call printLine
     mov ah, 4Ch        
     int 21h
 END main
