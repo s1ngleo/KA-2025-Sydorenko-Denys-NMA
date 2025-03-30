@@ -7,6 +7,7 @@
     startOfRules db 4 dup(?)
     endOfRules db 4 dup(?)
     curentRule db 4 dup(?)
+   move db 4 dup(?)
     replaceRuleLength db 4 dup(?)
   linePartToReplaceLENGTH db 4 dup(?)
     linePartToReplace db 4 dup(?) 
@@ -133,9 +134,10 @@ goto_replaceRule:
     mov word ptr replaceRuleLength, dx
     mov ax, word ptr replaceRuleLength
     cmp ax, word ptr linePartToReplaceLENGTH
-    je replace_cycle
+    
     jg expand_string
     jl shrink_string
+    jmp replace_cycle
 
 
 shrink_string:
@@ -154,7 +156,7 @@ shrink_string:
     sub ax, word ptr replaceRuleLength 
 
 
-    sub word ptr endOfRules,ax
+    
  
     
 
@@ -202,8 +204,8 @@ shrink_loop:
 
     mov ax, word ptr replaceRuleLength
     sub ax, word ptr linePartToReplaceLENGTH ;ax length to move right
-
-
+    
+    mov word ptr move, ax
     
 
 
@@ -235,10 +237,13 @@ shift_loop:
     pop di
     pop si
 
-    add di, word ptr linePartToReplaceLENGTH
+    add di, word ptr move
     mov ax,word ptr linePartToReplaceLENGTH
-    add    word ptr startOfRules,  ax      
-    jmp  replace_cycle;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-----------------------
+    
+    mov ax, word ptr move
+    add    word ptr startOfRules, ax
+
+    jmp  replace_cycle
  
     
 
