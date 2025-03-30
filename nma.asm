@@ -7,6 +7,7 @@
     startOfRules db 4 dup(?)
     endOfRules db 4 dup(?)
     curentRule db 4 dup(?)
+    replaceRuleLength db 4 dup(?)
   linePartToReplaceLENGTH db 4 dup(?)
     linePartToReplace db 4 dup(?) 
     fileName db "input.nma", 0 ; файл який будемо читати
@@ -75,7 +76,7 @@ set_rule:
 
 compare_loop:
     
-
+    
     mov al, byte ptr [di]     
     cmp al, byte ptr [si]     ; 
     jne not_equal             ; 
@@ -108,9 +109,10 @@ find_new_rule:
 
     inc di
     cmp byte ptr [di],00h
-    je ende ; STDOUT
     mov word ptr curentRule, di
-    jmp set_rule
+    jne set_rule
+    jmp ende ; STDOUT
+
           
 
 
@@ -126,9 +128,48 @@ goto_replaceRule:
     jne goto_replaceRule
     inc di
     call string_length
-
-    cmp dx, word ptr linePartToReplaceLENGTH
+    mov word ptr replaceRuleLength, dx
+    mov ax, word ptr replaceRuleLength
+    cmp ax, word ptr linePartToReplaceLENGTH
     je replace_cycle
+    jne expand_string
+
+
+
+
+    expand_string:
+    push si
+    push di
+    push cx
+ 
+    mov si, word ptr linePartToReplace
+    add si, word ptr linePartToReplaceLENGTH
+    mov di, word ptr endOfRules
+    dec di
+    mov cx, di
+    sub cx, si
+    add cx, 2
+    add di, word ptr replaceRuleLength
+    mov word ptr endOfRules, di
+shift_loop:
+    mov bx, si
+    add bx, cx
+    dec bx
+    mov al, byte ptr [bx]
+    mov byte ptr [di], al
+    dec di
+    dec cx
+    jnz shift_loop     
+
+  
+    pop cx
+    pop di
+    pop si             
+    add di, word ptr linePartToReplaceLENGTH
+    mov ax,word ptr linePartToReplaceLENGTH
+    add    word ptr startOfRules,  ax      
+    jmp  replace_cycle;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-----------------------
+ 
     
 
 replace_cycle:
@@ -140,9 +181,11 @@ replace_cycle:
     inc di
     inc si
     cmp byte ptr [di],09h
-    je replace_end
-    jne replace_cycle
     
+    jne replace_cycle
+    mov di, word ptr curentRule 
+    
+    jmp replace_end
 
 
 
