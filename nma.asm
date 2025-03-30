@@ -150,11 +150,12 @@ shrink_string:
     push dx
 
     mov di, word ptr linePartToReplace 
-    add di, word ptr replaceRuleLength
+    add di, word ptr replaceRuleLength  ; where to
 
-    mov ax, word ptr linePartToReplaceLENGTH
+    mov ax, word ptr linePartToReplaceLENGTH  ;move
     sub ax, word ptr replaceRuleLength 
-
+    
+    mov word ptr move, ax
 
     
  
@@ -162,7 +163,7 @@ shrink_string:
 
 
     
-  ;  mov word ptr endOfRules, di
+
 
 shrink_loop:
     mov bx,di
@@ -182,12 +183,22 @@ shrink_loop:
     pop di
     pop si
     
-    sub di, word ptr linePartToReplaceLENGTH
-    inc di
     
-    mov ax, word ptr linePartToReplaceLENGTH
-    sub    word ptr startOfRules,  ax      
+   
+    
+    mov ax, word ptr move
+    sub di, ax
+    sub  word ptr startOfRules, ax
+    sub word ptr endOfLine, ax
+    
     jmp  replace_cycle;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-----------------------
+
+
+
+
+
+
+
 
 
 
