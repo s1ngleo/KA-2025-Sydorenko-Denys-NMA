@@ -50,6 +50,7 @@ main:
     call read4BytesInAx
     mov word ptr startOfRules, si
     add si, ax
+    dec si
     mov word ptr endOfRules, si
     
 
@@ -127,12 +128,64 @@ goto_replaceRule:
     cmp byte ptr [di], 09h
     jne goto_replaceRule
     inc di
+    
     call string_length
     mov word ptr replaceRuleLength, dx
     mov ax, word ptr replaceRuleLength
     cmp ax, word ptr linePartToReplaceLENGTH
     je replace_cycle
-    jne expand_string
+    jg expand_string
+    jl shrink_string
+
+
+shrink_string:
+
+
+    push si
+    push di
+    push cx
+    push ax
+    push dx
+
+    mov di, word ptr linePartToReplace 
+    add di, word ptr replaceRuleLength
+
+    mov ax, word ptr linePartToReplaceLENGTH
+    sub ax, word ptr replaceRuleLength 
+
+
+    sub word ptr endOfRules,ax
+ 
+    
+
+
+    
+  ;  mov word ptr endOfRules, di
+
+shrink_loop:
+    mov bx,di
+    add bx, ax
+
+    mov dl, byte ptr [bx]
+    mov byte ptr [di], dl
+    inc di
+    
+   
+    cmp di,  word ptr endOfRules
+    jne shrink_loop     
+
+    pop dx
+    pop ax
+    pop cx
+    pop di
+    pop si
+    
+    sub di, word ptr linePartToReplaceLENGTH
+    inc di
+    
+    mov ax, word ptr linePartToReplaceLENGTH
+    sub    word ptr startOfRules,  ax      
+    jmp  replace_cycle;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-----------------------
 
 
 
@@ -141,30 +194,47 @@ goto_replaceRule:
     push si
     push di
     push cx
- 
+    push ax
+    push dx
+
     mov si, word ptr linePartToReplace
-    add si, word ptr linePartToReplaceLENGTH
-    mov di, word ptr endOfRules
+    
+
+    mov ax, word ptr replaceRuleLength
+    sub ax, word ptr linePartToReplaceLENGTH ;ax length to move right
+
+
+    
+
+
+
+    mov di, word ptr endOfRules ; di end of rules
     dec di
-    mov cx, di
-    sub cx, si
-    add cx, 2
+    
+
+
+    
+
     add di, word ptr replaceRuleLength
     mov word ptr endOfRules, di
-shift_loop:
-    mov bx, si
-    add bx, cx
-    dec bx
-    mov al, byte ptr [bx]
-    mov byte ptr [di], al
-    dec di
-    dec cx
-    jnz shift_loop     
 
-  
+shift_loop:
+    mov bx,di
+    sub bx, ax
+
+    mov dl, byte ptr [bx]
+    mov byte ptr [di], dl
+    dec di
+    
+    cmp di,  word ptr linePartToReplace
+    jne shift_loop     
+
+    pop dx
+    pop ax
     pop cx
     pop di
-    pop si             
+    pop si
+
     add di, word ptr linePartToReplaceLENGTH
     mov ax,word ptr linePartToReplaceLENGTH
     add    word ptr startOfRules,  ax      
