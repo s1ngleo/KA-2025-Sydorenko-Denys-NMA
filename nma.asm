@@ -7,7 +7,9 @@
     startOfRules db 4 dup(?)
     endOfRules db 4 dup(?)
     curentRule db 4 dup(?)
+
    move db 4 dup(?)
+   
     replaceRuleLength db 4 dup(?)
   linePartToReplaceLENGTH db 4 dup(?)
     linePartToReplace db 4 dup(?) 
@@ -35,7 +37,6 @@ main:
   
 
 
-;|||||||||||||||||||||||тут буде работа з даними файлу, які лежать у буфері, поки що з цікавого тут просто вивод||||||||||||||||||||||||||
     
     call read4BytesInAx
     add si, ax
@@ -44,9 +45,10 @@ main:
     mov word ptr startOfLine, si
     add si, ax
 
-    sub si, 3
+    
     mov word ptr endOfLine, si
-    add si, 3
+ 
+  
     
     call read4BytesInAx
     mov word ptr startOfRules, si
@@ -54,10 +56,6 @@ main:
     dec si
     mov word ptr endOfRules, si
     
-
-
-
-
 
 
     compareBytes:
@@ -93,7 +91,7 @@ compare_loop:
 
 not_equal:
 
-    cmp si, word ptr endOfLine
+   cmp si, word ptr endOfLine  
     je new_rule
 
     inc si
@@ -116,8 +114,6 @@ find_new_rule:
     jmp ende ; STDOUT
 
           
-
-
 
 replace:
     mov si, word ptr linePartToReplace
@@ -155,14 +151,8 @@ shrink_string:
     mov ax, word ptr linePartToReplaceLENGTH  ;move
     sub ax, word ptr replaceRuleLength 
     
+
     mov word ptr move, ax
-
-    
- 
-    
-
-
-    
 
 
 shrink_loop:
@@ -184,24 +174,12 @@ shrink_loop:
     pop si
     
     
-   
-    
     mov ax, word ptr move
     sub di, ax
     sub  word ptr startOfRules, ax
     sub word ptr endOfLine, ax
     
     jmp  replace_cycle;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-----------------------
-
-
-
-
-
-
-
-
-
-
 
     expand_string:
     push si
@@ -217,15 +195,10 @@ shrink_loop:
     sub ax, word ptr linePartToReplaceLENGTH ;ax length to move right
     
     mov word ptr move, ax
-    
-
 
 
     mov di, word ptr endOfRules ; di end of rules
     dec di
-    
-
-
     
 
     add di, word ptr replaceRuleLength
@@ -256,8 +229,6 @@ shift_loop:
     add  word ptr endOfLine, ax
    
     jmp  replace_cycle
- 
-    
 
 replace_cycle:
     
@@ -274,8 +245,6 @@ replace_cycle:
     
     jmp replace_end
 
-
-
 string_length proc   ;start of string in di, end must be 09h. result in dx
     xor dx, dx             
     push di
@@ -291,10 +260,6 @@ length_done:
     ret                    
 string_length endp
    
-
-
-
-
 
 read4BytesInAx proc
     xor ax, ax   
@@ -320,10 +285,9 @@ read4BytesInAx proc
 
 printLine proc
     mov si, word ptr startOfLine  
-  
 
 print_loop:
-    cmp byte ptr [si], 0dh               
+    cmp word ptr si, word ptr endOfLine          
     je print_done                 
 
     mov dl, byte ptr [si]          
