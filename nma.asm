@@ -241,8 +241,9 @@ shift_loop:
     mov ax,word ptr linePartToReplaceLENGTH
     
     mov ax, word ptr move
-    add    word ptr startOfRules, ax
-
+    add  word ptr startOfRules, ax
+    add  word ptr endOfLine, ax
+   
     jmp  replace_cycle
  
     
