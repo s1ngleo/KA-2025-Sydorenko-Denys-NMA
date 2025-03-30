@@ -85,7 +85,7 @@ compare_loop:
 
     jmp replace
     replace_end:                
-    jmp set_rule
+    jmp compareBytes
     
 
 not_equal:
