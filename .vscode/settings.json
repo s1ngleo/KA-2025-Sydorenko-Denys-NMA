@@ -3,26 +3,24 @@
     "masmtasm.ASM.mode": "workspace",
     "masmtasm.ASM.assembler": "TASMcom",
     "masmtasm.ASM.actions": {
-    
 
-"TASMcom": {
-    "baseBundle": "<built-in>/TASM.jsdos",
-    "before": [
-      "set PATH=C:\\TASM"
-    ],
-    "run": [
-      "TASM /s /m /n /q /zn ${file}",
-      "TLINK /t ${filename}", 
-      "RUN ${filename}.com"
-    ],
-    "debug": [
-        "TASM /zi ${file}",
-        "TLINK /v /t ${filename}.obj",
-        "copy C:\\TASM\\TDC2.TD TDCONFIG.TD",
-        "TD -cTDCONFIG.TD ${filename}.com input.nma"
-    ]
-},
-
+        "TASMcom": {
+            "baseBundle": "<built-in>/TASM.jsdos",
+            "before": [
+              "set PATH=C:\\TASM"
+            ],
+            "run": [
+              "TASM /s /m /n /q /zn ${file}",
+              "TLINK /3 /t /n /x ${filename}",
+              "RUN ${filename} input.nma"
+            ],
+            "debug": [
+              "TASM /s /m /n /q /zn  ${file}",
+              "TLINK /3 /t /n /x ${filename}.obj",
+              "copy C:\\TASM\\TDC2.TD TDCONFIG.TD",
+              "TD -cTDCONFIG.TD ${filename}.com input.nma"
+            ]
+        },
         "TASM": {
             "baseBundle": "<built-in>/TASM.jsdos",
             "before": [

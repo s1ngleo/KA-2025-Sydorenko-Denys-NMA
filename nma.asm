@@ -1,9 +1,25 @@
-.MODEL tiny
+.MODEL small
+.STACK 100h
 .DATA
-.CODE
-ORG 100h
-main:
+    buffer db 32768 dup(?)     ; дані/буфер
+    startOfLine db 4 dup(?)
+    endOfLine db 4 dup(?)
+    startOfRules db 4 dup(?)
+    endOfRules db 4 dup(?)
+    curentRule db 4 dup(?)
 
+   move db 4 dup(?)
+   
+    replaceRuleLength db 4 dup(?)
+  linePartToReplaceLENGTH db 4 dup(?)
+    linePartToReplace db 4 dup(?) 
+    fileName db "input.nma", 0 ; файл який будемо читати
+    fileHandle dw ?  ; handle    
+        
+.CODE
+main:
+    mov ax, @data
+    mov ds, ax
 
     ; відкриваємо файл
     mov ah, 3Dh        
@@ -289,22 +305,4 @@ ende:
 call printLine
     mov ah, 4Ch        
     int 21h
-
-
-
-    buffer db 32768 dup(?)     ; дані/буфер
-    startOfLine db 4 dup(?)
-    endOfLine db 4 dup(?)
-    startOfRules db 4 dup(?)
-    endOfRules db 4 dup(?)
-    curentRule db 4 dup(?)
-
-   move db 4 dup(?)
-   
-    replaceRuleLength db 4 dup(?)
-  linePartToReplaceLENGTH db 4 dup(?)
-    linePartToReplace db 4 dup(?) 
-    fileName db "input.nma", 0 ; файл який будемо читати
-    fileHandle dw ?  ; handle    
-        
 END main
