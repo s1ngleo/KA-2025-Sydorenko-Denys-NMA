@@ -1,25 +1,34 @@
-.MODEL small
-.STACK 100h
-.DATA
-    buffer db 32768 dup(?)     ; дані/буфер
-    startOfLine db 4 dup(?)
-    endOfLine db 4 dup(?)
-    startOfRules db 4 dup(?)
-    endOfRules db 4 dup(?)
-    curentRule db 4 dup(?)
-
-   move db 4 dup(?)
-   
-    replaceRuleLength db 4 dup(?)
-  linePartToReplaceLENGTH db 4 dup(?)
-    linePartToReplace db 4 dup(?) 
-    fileName db "input.nma", 0 ; файл який будемо читати
-    fileHandle dw ?  ; handle    
-        
+.MODEL tiny  
 .CODE
+org 100h
 main:
-    mov ax, @data
-    mov ds, ax
+
+
+;taking filename from commandline
+mov si, 80h         
+    xor cx, cx
+    mov cl, [si]       
+
+    inc si            
+    lea di, fileName    
+    mov bx, di         
+
+copy_filename:
+    mov al, [si]        
+    cmp al, 0Dh         
+    je end_copy
+    cmp al, 20h         
+    je skip_space
+    mov [di], al         
+    inc di
+skip_space:
+    inc si
+    loop copy_filename
+
+end_copy:
+    mov byte ptr [di], 0 
+
+
 
     ; відкриваємо файл
     mov ah, 3Dh        
@@ -36,7 +45,7 @@ main:
     int 21h
   
 
-
+    lea si, buffer
     
     call read4BytesInAx
     add si, ax
@@ -305,4 +314,21 @@ ende:
 call printLine
     mov ah, 4Ch        
     int 21h
+
+
+
+    buffer db 300 dup(?)     ; зробити 32768, при кращих часах)
+    startOfLine db 4 dup(?)
+    endOfLine db 4 dup(?)
+    startOfRules db 4 dup(?)
+    endOfRules db 4 dup(?)
+    curentRule db 4 dup(?)
+
+   move db 4 dup(?)
+   
+    replaceRuleLength db 4 dup(?)
+  linePartToReplaceLENGTH db 4 dup(?)
+    linePartToReplace db 4 dup(?) 
+    fileName db 21 dup(?) ; файл який будемо читати
+    fileHandle dw ?  ; handle    
 END main
