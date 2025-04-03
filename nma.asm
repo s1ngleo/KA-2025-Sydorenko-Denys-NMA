@@ -68,7 +68,7 @@ end_copy:
 
 
     compareBytes:
-   
+   xor bx,bx
     mov si, word ptr startOfLine    
     xor dx,dx
     mov dx, word ptr startOfRules   
@@ -83,14 +83,17 @@ set_rule:
     mov word ptr linePartToReplaceLENGTH, dx
     mov cx, dx
 
+
 compare_loop:
     
     
     mov al, byte ptr [di]     
-    cmp al, byte ptr [si]     ; 
+    cmp al, byte ptr [si]  
+
     jne not_equal             ; 
     inc si                    
-    inc di                    ; 
+    inc di               
+    inc bx     ; 
     loop compare_loop         ; 
 
     jmp replace
@@ -98,15 +101,31 @@ compare_loop:
     jmp compareBytes
     
 
+decSi  proc 
+    decSi:
+    cmp bx,0
+    je endSI
+    dec bx
+    dec si
+    jne decSi
+endSI:
+    ret
+decSi endp
+
 not_equal:
 
    cmp si, word ptr endOfLine  
     je new_rule
 
+    call decSi
+
+
     inc si
     mov word ptr linePartToReplace, si
 
     mov di, word ptr curentRule  ; there must be adress of current rule 
+    
+    mov cx, word ptr linePartToReplaceLENGTH
     jne  compare_loop    
 new_rule:
 
@@ -120,7 +139,7 @@ find_new_rule:
     cmp byte ptr [di],00h
     mov word ptr curentRule, di
     jne set_rule
-    jmp ende ; STDOUT
+    call printLine ; STDOUT
 
           
 
@@ -135,6 +154,12 @@ goto_replaceRule:
     jne goto_replaceRule
     inc di
     
+    cmp byte ptr [di], 09h
+    
+    je zeroReplaceRule
+    cmp byte ptr [di], '.'
+    je zeroReplaceRule
+    
     call string_length
     mov word ptr replaceRuleLength, dx
     mov ax, word ptr replaceRuleLength
@@ -143,6 +168,10 @@ goto_replaceRule:
     jg expand_string
     jl shrink_string
     jmp replace_cycle
+
+zeroReplaceRule:
+ mov word ptr replaceRuleLength, 0
+
 
 
 shrink_string:
@@ -187,8 +216,19 @@ shrink_loop:
     sub di, ax
     sub  word ptr startOfRules, ax
     sub word ptr endOfLine, ax
+    cmp word ptr replaceRuleLength,0
+    je zeroReplace
+    cmp byte ptr [di], '.'
+    je endDot
     
-    jmp  replace_cycle;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-----------------------
+      
+    jne  replace_cycle;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-----------------------
+
+zeroReplace:    
+    jmp replace_end
+
+endDot:
+call printLine
 
     expand_string:
     push si
@@ -306,18 +346,16 @@ print_loop:
     jmp print_loop                
 
 print_done:
-    ret                           
+    mov ah, 4Ch        
+    int 21h
+                               
 printLine endp
     
 
-ende:
-call printLine
-    mov ah, 4Ch        
-    int 21h
 
 
 
-    buffer db 300 dup(?)     ; зробити 32768, при кращих часах)
+    buffer db 221 dup(?)     ; зробити 32768, при кращих часах)
     startOfLine db 4 dup(?)
     endOfLine db 4 dup(?)
     startOfRules db 4 dup(?)
