@@ -136,12 +136,14 @@ find_new_rule:
     jne find_new_rule
 
     inc di
+    cmp byte ptr [di],09h
+    je placeRuleToStart
     cmp byte ptr [di],00h
     mov word ptr curentRule, di
     jne set_rule
     call printLine ; STDOUT
 
-          
+        
 
 replace:
     mov si, word ptr linePartToReplace
@@ -168,6 +170,20 @@ goto_replaceRule:
     jg expand_string
     jl shrink_string
     jmp replace_cycle
+
+
+placeRuleToStart:
+mov si, word ptr startOfLine
+push di
+    
+    mov di, word ptr startOfLine
+    mov word ptr linePartToReplace, di 
+    pop di
+    inc di
+    call string_length
+    mov word ptr replaceRuleLength, dx
+    mov word ptr linePartToReplaceLENGTH, 0
+    jmp expand_string
 
 zeroReplaceRule:
  mov word ptr replaceRuleLength, 0
@@ -216,10 +232,11 @@ shrink_loop:
     sub di, ax
     sub  word ptr startOfRules, ax
     sub word ptr endOfLine, ax
-    cmp word ptr replaceRuleLength,0
-    je zeroReplace
     cmp byte ptr [di], '.'
     je endDot
+    cmp word ptr replaceRuleLength,0
+    je zeroReplace
+
     
       
     jne  replace_cycle;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-----------------------
@@ -247,8 +264,10 @@ call printLine
 
 
     mov di, word ptr endOfRules ; di end of rules
+    cmp word ptr linePartToReplaceLENGTH, 0
+    je NODEC
     dec di
-    
+   NODEC: 
 
     add di, word ptr replaceRuleLength
     mov word ptr endOfRules, di
@@ -269,8 +288,11 @@ shift_loop:
     pop cx
     pop di
     pop si
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+  cmp word ptr linePartToReplaceLENGTH, 0
 
     add di, word ptr move
+   
     mov ax,word ptr linePartToReplaceLENGTH
     
     mov ax, word ptr move
@@ -350,7 +372,7 @@ print_done:
     int 21h
                                
 printLine endp
-    
+        
 
 
 
