@@ -158,6 +158,7 @@ goto_replaceRule:
     
     cmp byte ptr [di], 09h
     je zeroReplaceRule
+
     
     call string_length
     mov word ptr replaceRuleLength, dx
@@ -298,39 +299,46 @@ shift_loop:
    
     jmp  replace_cycle
 
+replace_cycle_without_dot:
+    inc di
+    mov byte ptr isEnd, 1
+
 replace_cycle:
     
-
+    cmp byte ptr [di], '.'
+    je replace_cycle_without_dot
+    cmp byte ptr [di],09h
+    je endDot
     mov bh, byte ptr [di]
     mov [si], bh
     
     inc di
     inc si
-    cmp byte ptr [di],'.'
-    je endDot
     cmp byte ptr [di],09h
     
     jne replace_cycle
     mov di, word ptr curentRule 
     
+    cmp byte ptr isEnd, 1
+    je endDot
     jmp replace_end
 
 string_length proc   ;start of string in di, end must be 09h. result in dx
     xor dx, dx             
     push di
-    cmp byte ptr [di], '.'
-    je length_done
+    dec di
+   length_loopnext: 
+    inc di
 length_loop:
-    cmp byte ptr [di], '.'
-    je length_done
-
     cmp byte ptr [di], 09h  
-    je length_done       
-    inc di                 
-    inc dx              
-    jmp length_loop  
+    je length_done    
 
+    cmp byte ptr [di], '.'
+    je length_loopnext       
 
+    inc dx   
+    inc di             
+    jmp length_loop        
 
 length_done:
     pop di
@@ -339,22 +347,22 @@ string_length endp
    
 
 read4BytesInAx proc
-    xor ax, ax   
-            
-    mov al, byte ptr [si]
-       
+    xor ax, ax          
+
+
+    mov al, byte ptr [si]   
     inc si                 
-    add al, byte ptr [si] 
-   
-    inc si                
-    add al, byte ptr [si] 
+
+    mov bl, byte ptr [si]   
+    shl bx, 8              
+    or ax, bx              
     
-    inc si   
-    add al, byte ptr [si]
-      
-    inc si      
+    inc si                 
+    inc si
+    inc si
+
     ret
-    read4BytesInAx endp
+read4BytesInAx endp
 
 
 
@@ -378,7 +386,6 @@ print_done:
     int 21h
                                
 printLine endp
-    
         
 ;END FOR COM
 
@@ -390,7 +397,7 @@ printLine endp
     startOfRules db 4 dup(?)
     endOfRules db 4 dup(?)
     curentRule db 4 dup(?)
-
+isEnd db 1 dup(0)
    move db 4 dup(?)
    
     replaceRuleLength db 4 dup(?)
