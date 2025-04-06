@@ -53,12 +53,12 @@ end_copy:
     call read4BytesInAx
     mov word ptr startOfLine, si
     add si, ax
-
+    dec si
     
     mov word ptr endOfLine, si
  
   
-    
+    inc si
     call read4BytesInAx
     mov word ptr startOfRules, si
     add si, ax
@@ -128,7 +128,7 @@ call decSi
     mov cx, word ptr linePartToReplaceLENGTH
     jne  compare_loop    
 new_rule:
-
+    
     mov di, word ptr curentRule
 find_new_rule:    
     inc di
@@ -356,7 +356,7 @@ read4BytesInAx proc
     mov bl, byte ptr [si]   
     shl bx, 8              
     or ax, bx              
-    
+
     inc si                 
     inc si
     inc si
@@ -370,9 +370,10 @@ read4BytesInAx endp
 
 printLine proc
     mov si, word ptr startOfLine  
-
+    mov bx, word ptr endOfLine 
+    inc bx
 print_loop:
-    cmp word ptr si, word ptr endOfLine          
+    cmp si, bx      
     je print_done                 
 
     mov dl, byte ptr [si]          
@@ -386,7 +387,6 @@ print_done:
     int 21h
                                
 printLine endp
-        
 ;END FOR COM
 
 
