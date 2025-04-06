@@ -46,7 +46,7 @@ end_copy:
   
 
     lea si, buffer
-    
+    ;START FOR COM
     call read4BytesInAx
     add si, ax
 
@@ -157,9 +157,6 @@ goto_replaceRule:
     inc di
     
     cmp byte ptr [di], 09h
-    
-    je zeroReplaceRule
-    cmp byte ptr [di], '.'
     je zeroReplaceRule
     
     call string_length
@@ -274,7 +271,7 @@ call printLine
 
 shift_loop:
     mov bx,di
-    sub bx, ax  
+    sub bx, ax
 
     mov dl, byte ptr [bx]
     mov byte ptr [di], dl
@@ -309,6 +306,8 @@ replace_cycle:
     
     inc di
     inc si
+    cmp byte ptr [di],'.'
+    je endDot
     cmp byte ptr [di],09h
     
     jne replace_cycle
@@ -319,12 +318,19 @@ replace_cycle:
 string_length proc   ;start of string in di, end must be 09h. result in dx
     xor dx, dx             
     push di
+    cmp byte ptr [di], '.'
+    je length_done
 length_loop:
+    cmp byte ptr [di], '.'
+    je length_done
+
     cmp byte ptr [di], 09h  
     je length_done       
     inc di                 
     inc dx              
-    jmp length_loop        
+    jmp length_loop  
+
+
 
 length_done:
     pop di
@@ -372,12 +378,13 @@ print_done:
     int 21h
                                
 printLine endp
+    
         
+;END FOR COM
 
 
 
-
-    buffer db 221 dup(?)     ; зробити 32768, при кращих часах)
+    buffer db 32768 dup(?)     ; зробити 32768, при кращих часах) 221
     startOfLine db 4 dup(?)
     endOfLine db 4 dup(?)
     startOfRules db 4 dup(?)
