@@ -113,11 +113,11 @@ endSI:
 decSi endp
 
 not_equal:
-
+call decSi
    cmp si, word ptr endOfLine  
     je new_rule
 
-    call decSi
+    
 
 
     inc si
