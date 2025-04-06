@@ -274,7 +274,7 @@ call printLine
 
 shift_loop:
     mov bx,di
-    sub bx, ax
+    sub bx, ax  
 
     mov dl, byte ptr [bx]
     mov byte ptr [di], dl
