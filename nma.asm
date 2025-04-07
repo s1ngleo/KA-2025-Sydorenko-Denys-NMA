@@ -390,8 +390,8 @@ printLine endp
 ;END FOR COM
 
 
-
-    buffer db 32768 dup(?)     ; зробити 32768, при кращих часах) 221
+   
+      ; зробити 32768, при кращих часах) 221
     startOfLine db 4 dup(?)
     endOfLine db 4 dup(?)
     startOfRules db 4 dup(?)
@@ -404,5 +404,7 @@ isEnd db 1 dup(0)
   linePartToReplaceLENGTH db 4 dup(?)
     linePartToReplace db 4 dup(?) 
     fileName db 21 dup(?) ; файл який будемо читати
-    fileHandle dw ?  ; handle    
-END main
+    fileHandle dw ?  ; handle  
+   buffer db 32768 dup(?) 
+   
+END main     

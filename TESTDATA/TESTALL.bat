@@ -26,6 +26,7 @@ echo ================================================
 
 CALL TESTORIG.BAT
 CALL TESTSTD.BAT
+CALL TESTZADV.BAT
 CALL TESTCUST.BAT
 echo ================================================
 
