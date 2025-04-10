@@ -167,7 +167,7 @@ goto_replaceRule:
     
     jg expand_string
     jl shrink_string
-    jmp replace_cycle
+    jmp above_replace_cycle
 
 
 placeRuleToStart:
@@ -230,14 +230,12 @@ shrink_loop:
     sub di, ax
     sub  word ptr startOfRules, ax
     sub word ptr endOfLine, ax
-    cmp byte ptr [di], '.'
-    je endDot
     cmp word ptr replaceRuleLength,0
     je zeroReplace
 
     
       
-    jne  replace_cycle;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-----------------------
+    jne  above_replace_cycle;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-----------------------
 
 zeroReplace:    
     jmp replace_end
@@ -297,18 +295,29 @@ shift_loop:
     add  word ptr startOfRules, ax
     add  word ptr endOfLine, ax
    
-    jmp  replace_cycle
+    jmp  above_replace_cycle
 
-replace_cycle_without_dot:
-    inc di
+above_replace_cycle:
+
+    cmp byte ptr [di],'.'  
+    jne nextCheck
     mov byte ptr isEnd, 1
 
-replace_cycle:
+nextCheck:
+    mov ax,di
+    add ax, word  ptr replaceRuleLength
+    dec ax
     
-    cmp byte ptr [di], '.'
-    je replace_cycle_without_dot
-    cmp byte ptr [di],09h
-    je endDot
+    push di
+    mov di,ax
+    cmp byte ptr [di],'.'  
+    pop di
+    jne replace_cycle
+    mov byte ptr isEnd, 1
+
+
+replace_cycle:
+
     mov bh, byte ptr [di]
     mov [si], bh
     
@@ -320,21 +329,21 @@ replace_cycle:
     mov di, word ptr curentRule 
     
     cmp byte ptr isEnd, 1
-    je endDot
+    je endDotnear
     jmp replace_end
+
+
+endDotnear:
+    call printLine
 
 string_length proc   ;start of string in di, end must be 09h. result in dx
     xor dx, dx             
     push di
-    dec di
-   length_loopnext: 
-    inc di
+
 length_loop:
     cmp byte ptr [di], 09h  
     je length_done    
-
-    cmp byte ptr [di], '.'
-    je length_loopnext       
+    
 
     inc dx   
     inc di             
@@ -372,10 +381,36 @@ printLine proc
     mov si, word ptr startOfLine  
     mov bx, word ptr endOfLine 
     inc bx
+
+mov di, word ptr linePartToReplace
+cmp byte ptr [di], '.'
+    jne nextCheckPrint
+
+    mov word ptr skipDot, di
+
+    nextCheckPrint:
+    cmp word ptr skipDot, di
+    je print_loop
+
+    mov di, word ptr linePartToReplace
+    add di, word ptr replaceRuleLength
+    dec di
+    cmp byte ptr [di], '.'
+    jne print_loop
+    
+    mov word ptr skipDot, di
+    jmp print_loop
+    
+incSI:
+    inc si
+    jmp incSIreturn
+
 print_loop:
     cmp si, bx      
     je print_done                 
-
+    cmp si, word ptr skipDot
+    je incSI
+incSIreturn:
     mov dl, byte ptr [si]          
     mov ah, 02h                  
     int 21h                     
@@ -390,7 +425,7 @@ printLine endp
 ;END FOR COM
 
 
-   
+    buffer db 32768 dup(?) 
       ; зробити 32768, при кращих часах) 221
     startOfLine db 4 dup(?)
     endOfLine db 4 dup(?)
@@ -399,12 +434,12 @@ printLine endp
     curentRule db 4 dup(?)
 isEnd db 1 dup(0)
    move db 4 dup(?)
-   
+       skipDot db 4 dup(?)
     replaceRuleLength db 4 dup(?)
   linePartToReplaceLENGTH db 4 dup(?)
     linePartToReplace db 4 dup(?) 
     fileName db 21 dup(?) ; файл який будемо читати
     fileHandle dw ?  ; handle  
-   buffer db 32768 dup(?) 
+  
    
 END main     
