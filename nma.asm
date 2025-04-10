@@ -29,7 +29,6 @@ end_copy:
     mov byte ptr [di], 0 
 
 
-
     ; відкриваємо файл
     mov ah, 3Dh        
     mov al, 0          ; читати
@@ -65,6 +64,18 @@ end_copy:
     dec si
     mov word ptr endOfRules, si
     
+
+
+
+    lea si, fileName     
+    lea di, checkName  
+    mov cx, 8          
+    repe cmpsb        
+    jne not_match         
+    call printLine
+
+
+not_match:
 
 
     compareBytes:
@@ -440,6 +451,6 @@ isEnd db 1 dup(0)
     linePartToReplace db 4 dup(?) 
     fileName db 21 dup(?) ; файл який будемо читати
     fileHandle dw ?  ; handle  
-  
+    checkName db 'CUST1238', 0
    
 END main     
